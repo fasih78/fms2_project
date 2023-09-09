@@ -16,7 +16,7 @@ const SalescontractCore = new mongoose.Schema({
   shipment: { type: Boolean, default: false },
   customer: { type: mongoose.Schema.ObjectId },
   brand: { type: mongoose.Schema.ObjectId },
-  paymentterm: { type: mongoose.Schema.ObjectId },
+  paymentTerm: { type: mongoose.Schema.ObjectId },
   shipvia: { type: mongoose.Schema.ObjectId },
 });
 const SalesContractModel = mongoose.model("SALESCONTRACTS", SalescontractCore);

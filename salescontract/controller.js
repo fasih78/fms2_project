@@ -1,9 +1,12 @@
 const fastify = require("fastify");
 const {
-  createSalesContract,
+  createSalesContractHandler,
   SaleContractfindoneByidHandler,
   SaleContractFindallHandler,
-  findSalesContractDtlsByDate,
+  findSalesContractDtlsByDateHandler,
+  SaleContractdeleteOneHandler,
+  SalesContractdeleteallHandler,
+  SaleContractupdateOneHandler,
 } = require("./handler.js");
 
 const route = async (fastify, option, done) => {
@@ -80,7 +83,7 @@ const route = async (fastify, option, done) => {
         },
       },
     },
-    handler: createSalesContract,
+    handler: createSalesContractHandler,
   });
 
   fastify.route({
@@ -174,8 +177,97 @@ const route = async (fastify, option, done) => {
         },
       },
     },
-    handler: findSalesContractDtlsByDate,
+    handler: findSalesContractDtlsByDateHandler,
   });
+
+  fastify.route({
+    method: "DELETE",
+    url: "/Salecontract/deleteone/:id",
+    schema: {
+      description: "Salecontract delete one",
+      summary: "Salecontract delete one",
+      tags: ["SaleContract"],
+      params: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Salecontract id",
+          },
+        },
+        required: ["id"],
+      },
+      response: {
+        200: {
+          type: "object",
+          description: "sucessfully reterived id!",
+          properties: {
+            message: {
+              type: "string",
+              description: "sucess",
+            },
+          },
+        },
+      },
+    },
+    handler: SaleContractdeleteOneHandler,
+  });
+
+  fastify.route({
+    method: "DELETE",
+    url: "/Salecontract/deleteall",
+    schema: {
+      description: "Salecontract",
+      summary: "Salecontract delete all",
+      tags: ["SaleContract"],
+      response: {
+        200: {
+          type: "array",
+          description: "sucessfully reterived id!",
+          properties: {
+            message: {
+              type: "string",
+              description: "sucess",
+            },
+          },
+        },
+      },
+    },
+    handler: SalesContractdeleteallHandler,
+  });
+  fastify.put("/Salecontract/updatebyid/:id", {
+    // method: "PUT",
+    // url: "/Producion/updatebyid/:id",
+    schema: {
+      description: "Salecontract update",
+      summary: "Salecontract update",
+      tags: ["SaleContract"],
+      params: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            description: "Salecontract id",
+          },
+        },
+        required: ["id"],
+      },
+      response: {
+        200: {
+          type: "object",
+          description: "sucessfully reterived id!",
+          properties: {
+            message: {
+              type: "string",
+              description: "sucess",
+            },
+          },
+        },
+      },
+    },
+    handler: SaleContractupdateOneHandler,
+  });
+
   done();
 };
 

@@ -7,6 +7,7 @@ const json = require("json");
 const fastifySwaggerUi = require("@fastify/swagger-ui");
 
 const { option, fastifyUI } = require("./swagger.js");
+const { request } = require("express");
 fastify.register(cors);
 
 // fastify.register(jwt, {
@@ -29,6 +30,7 @@ fastify.register(require("./payment_term/controller.js"));
 fastify.register(require("./Production/controller.js"));
 fastify.register(require("./shipVia/controller"));
 fastify.register(require('./salescontract/controller.js'))
+fastify.register(require('./shipment/controller'))
 
 const server = fastify.listen(
   { port: process.env.NODE_PORT },

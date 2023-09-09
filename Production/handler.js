@@ -127,12 +127,12 @@ const ProductiondtlBydateHandler = async (req, reply) => {
           ],
         });
     } else {
-      const production = await ProductionModel.findOne({
+      const production = await ProductionModel.find({
         customer: customerid,
         isDeleted: false,
       });
 
-      return await ProductiondtlModel.find({
+      return await ProductiondtlModel.findOne({
         production: production._id,
         date: {
           $gte: fromDate.toDate(),

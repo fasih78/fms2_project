@@ -184,7 +184,7 @@ const route = async (fastify, option, done) => {
 
   fastify.route({
     method: "DELETE",
-    url: "/Production/deleteall/:id",
+    url: "/Production/deleteone/:id",
     schema: {
       description: "production delete one",
       summary: "production delete one",
@@ -264,7 +264,7 @@ const route = async (fastify, option, done) => {
               description: "sucess",
             },
           },
-        },
+        },  
       },
     },
     handler: ProductupdatebyidHandler,
