@@ -237,7 +237,7 @@ const SaleContractdeleteOneHandler = async (req, reply) => {
     const id = req.params.id;
     console.log(id);
 
-    const production = await SalesContractModel.findById(id);
+    
     const deleteone = await SalesContractModel.findByIdAndUpdate(id, {
       isDeleted: true,
     });

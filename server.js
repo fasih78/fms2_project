@@ -29,8 +29,10 @@ fastify.register(require("./machine/controller.js"));
 fastify.register(require("./payment_term/controller.js"));
 fastify.register(require("./Production/controller.js"));
 fastify.register(require("./shipVia/controller"));
-fastify.register(require('./salescontract/controller.js'))
-fastify.register(require('./shipment/controller'))
+fastify.register(require("./salescontract/controller.js"));
+fastify.register(require("./shipment/controller"));
+fastify.register(require("./invoice/controller.js"));
+fastify.register(require("./payment/controller"))
 
 const server = fastify.listen(
   { port: process.env.NODE_PORT },
