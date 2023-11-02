@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const SalescontractDtlCore = new mongoose.Schema({
+  tran:{type:Number},
   qty: { type: Number, required: true },
   rate: { type: Number, required: true },
   amount: { type: Number, required: true },

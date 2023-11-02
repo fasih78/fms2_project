@@ -8,7 +8,7 @@ const CustomerModel = require("../customer/customerSchema.js");
 
 const createPaymentHandler = async (req, reply) => {
   try {
-    const { paymentReceivedDate, cheaqueNo, specialInstruction, invoice } =
+    const { paymentReceivedDate, cheaqueNo, specialInstruction, invoice, paymentDate } =
       req.body;
 
     const LastUser = await PaymentModel.findOne().sort({ _id: -1 });
@@ -17,17 +17,18 @@ const createPaymentHandler = async (req, reply) => {
     const create = await PaymentModel.create({
       id: id,
       paymentReceivedDate: moment(paymentReceivedDate).format("YYYY-MM-DD"),
+      paymentDate: moment(paymentDate).format("YYYY-MM-DD"),
       cheaqueNo: cheaqueNo,
       specialInstruction: specialInstruction,
       invoice: new mongoose.Types.ObjectId(invoice),
     });
     const invoicetrue = await InvoiceModel.findByIdAndUpdate(invoice, {
       payment: true,
-    });
+    })
     const invoicedtltrue = await InvoicedtlModel.findByIdAndUpdate({
       invoice: invoice,
       payment: true,
-    });
+    })
   } catch (error) {
     reply.status(200).send("Sucessfully inserted!");
   }
@@ -46,7 +47,7 @@ const PaymentfindoneHandler = async (req, reply) => {
         {
           path: "salesContract",
           model: SalesContractModel,
-          populate: [{ path: CustomerModel, model: CustomerModel }],
+          populate: [{ path: 'customer', model: CustomerModel }],
         },
       ],
     });
@@ -103,6 +104,38 @@ const PaymentupdatebyidHandler = async (req, reply) => {
   }
 };
 
+const PaymentDtlReportHandler = async (req, reply) => {
+  try {
+    const fromDate = moment(req.body.fromDate).startOf("day");
+    const toDate = moment(req.body.toDate).endOf("day");
+    const invoice_id = req.body.invoice;
+    where = {
+      paymentReceivedDate: {
+        $gte: fromDate.toDate(),
+        $lte: toDate.toDate(),
+      },
+      isDeleted: false,
+    };
+    if (!invoice_id) {
+      const payment = await PaymentModel.find(where).populate({
+        path: "invoice",
+        model: InvoiceModel,
+      });
+      return payment;
+    } else {
+      const payment = await PaymentModel.find(where, {
+        invoice: invoice_id,
+      }).populate({
+        path: "invoice",
+        model: InvoiceModel,
+      });
+      return payment;
+    }
+  } catch (err) {
+    reply.status(500).send({ error: err.message });
+  }
+};
+
 module.exports = {
   createPaymentHandler,
   PaymentfindoneHandler,
@@ -110,4 +143,5 @@ module.exports = {
   PaymentDeleteoneHandler,
   PaymentDeleteallHandler,
   PaymentupdatebyidHandler,
+  PaymentDtlReportHandler,
 };

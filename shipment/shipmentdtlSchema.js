@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const ShipmentdtlCore = new mongoose.Schema({
   qty: { type: Number },
+  shipment: { type: Number, default: 0 },
   rate: { type: Number },
   amount: { type: Number },
   gpDate: { type: Date, default: Date.now() },

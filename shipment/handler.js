@@ -37,6 +37,7 @@ const createShipmentHandler = async (req, reply) => {
     });
     for (const shipDtl of ShipmentDtl) {
       const newshipdtl = await ShipmentdtlModel.create({
+        shipment: shipmentNumber,
         qty: shipDtl.qty,
         rate: shipDtl.rate,
         gpDate: moment(gpDate).format("YYYY-MM-DD"),

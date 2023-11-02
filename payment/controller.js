@@ -5,6 +5,7 @@ const {
   PaymentDeleteoneHandler,
   PaymentDeleteallHandler,
   PaymentupdatebyidHandler,
+  PaymentDtlReportHandler,
 } = require("./handler.js");
 
 const routes = async (fastify, option, done) => {
@@ -33,6 +34,10 @@ const routes = async (fastify, option, done) => {
           invoice: {
             type: "string",
             description: "invoice object id",
+          },
+          paymentDate: {
+            type: "string",
+            description: "payment Date",
           },
         },
       },
@@ -236,6 +241,43 @@ const routes = async (fastify, option, done) => {
       },
     },
     handler: PaymentupdatebyidHandler,
+  });
+
+  fastify.route({
+    method: "POST",
+    url: "/Payment/ReportDtl",
+    schema: {
+      description: " Payment find all",
+      tags: ["Payment"],
+      summary: " Payment Report",
+      body: {
+        type: "object",
+        properties: {
+          fromDate: {
+            type: "string",
+            description: " from date",
+          },
+          toDate: {
+            type: "string",
+            description: "to date ",
+          },
+
+          invoice_id: {
+            type: "string",
+            description: "invoice object id",
+          },
+        },
+      },
+    },
+    response: {
+      200: {
+        description: "Payment find",
+        properties: {
+          message: { type: "string" },
+        },
+      },
+    },
+    handler: PaymentDtlReportHandler,
   });
 
   done();

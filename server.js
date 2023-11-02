@@ -33,6 +33,7 @@ fastify.register(require("./salescontract/controller.js"));
 fastify.register(require("./shipment/controller"));
 fastify.register(require("./invoice/controller.js"));
 fastify.register(require("./payment/controller"))
+fastify.register(require("./royality/controller.js"))
 
 const server = fastify.listen(
   { port: process.env.NODE_PORT },

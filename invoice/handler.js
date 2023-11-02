@@ -30,8 +30,10 @@ const createInvoiceHandler = async (req, reply) => {
       specialInstuction: specialInstruction,
       saleTaxinvoice_no: saleTaxinvoice_no,
     });
+
     for (const invDtl of invoiceDtl) {
       const newInvoiceDtl = await InvoicedtlModel.create({
+        inv: inv,
         qty: invDtl.qty,
         rate: invDtl.rate,
         amount: +invDtl.qty * +invDtl.rate,
@@ -396,27 +398,24 @@ const InvoiceDeleteAll = async (req, reply) => {
 };
 const InvoiceDelelteOne = async (req, reply) => {
   try {
-    const id = req.params.id; 
-    
-  
+    const id = req.params.id;
+
     const deleteid = await InvoiceModel.findByIdAndUpdate(id, {
       isDeleted: true,
     });
 
-   
     const dtl = await InvoicedtlModel.updateMany(
       { invoice: id },
       {
         isDeleted: true,
       }
     );
-    
-    reply.send({ message: 'Invoice deleted successfully' });
+
+    reply.send({ message: "Invoice deleted successfully" });
   } catch (err) {
     reply.status(500).send({ error: err.message });
   }
 };
-
 
 const InvoiceupdateByid = async (req, reply) => {
   try {

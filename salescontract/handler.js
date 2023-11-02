@@ -46,6 +46,7 @@ const createSalesContractHandler = async (req, reply) => {
     console.log(salescontract._id);
     for (const sale of salesContractDtl) {
       const newSalesDtl = await SaleContractdtlModel.create({
+        tran:tran,
         qty: sale.qty,
         rate: sale.rate,
         amount: +sale.qty * +sale.rate,

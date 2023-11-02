@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const InvoicedtlCore = new mongoose.Schema({
   qty: { type: Number },
   rate: { type: Number },
+  inv:{type:Number},
   amount: { type: Number },
   exchangeRate: { type: Number },
   uom: { type: String },
