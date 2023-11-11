@@ -9,10 +9,11 @@ const ShipmentdtlCore = new mongoose.Schema({
   uom: { type: String },
   isDeleted: { type: Boolean, default: false },
   saleTaxRate: { type: Number },
-  saleTaxAmount: { type: Number },
   product: { type: mongoose.Schema.ObjectId },
   currency: { type: mongoose.Schema.ObjectId },
   shipment: { type: mongoose.Schema.ObjectId },
+  customer:{type:mongoose.Schema.ObjectId},
+  salesContract:{type:mongoose.Schema.ObjectId}
 });
 const ShipmentdtlModel = mongoose.model("SHIPMENTDTL", ShipmentdtlCore);
 module.exports = ShipmentdtlModel;

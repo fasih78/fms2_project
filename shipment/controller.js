@@ -6,6 +6,7 @@ const {
   ShipmentdeleteOneHandler,
   ShipmentDeleteallHandler,
   ShipmentupdatebyidHandler,
+  ShipmentDtlReportHandler
 } = require("./handler.js");
 const { schema } = require("./shipmentdtlSchema.js");
 
@@ -250,6 +251,77 @@ const route = async (fastify, option, done) => {
     },
     handler: ShipmentupdatebyidHandler,
   });
+  fastify.route({
+    method: "POST",
+    url: "/Shipment/findbydatedtlreport",
+    schema: {
+      tags: ["Shipment"],
+      summary: "shipment find  date",
+      description: "shipment find by date",
+      body: {
+        type: "object",
+        properties: {
+          fromDate: {
+            type: "string",
+            description: "fromdate of SalesContract",
+          },
+          toDate: {
+            type: "string",
+          },
+          salesContract: {  
+            type: "array",
+            description: "salecontract id",
+          },
+          product: {
+            type: "array",
+            description: "product id",
+          },
+          customer: {
+            type: "array",
+            description: "customer id",
+          },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          description: "Successfully retrieved data!",
+          properties: {
+            message: {
+              type: "string",
+              description: "Success message",
+            },
+            Shipmentdtl: {
+              type: "array",
+              description: "Array of shipment details",
+            },
+            total_records: {
+              type: "integer",
+              description: "Total number of records",
+            },
+            paginated_record: {
+              type: "integer",
+              description: "Number of paginated records",
+            },
+            totalQty: {
+              type: "integer",
+              description: "Total number of records",
+            },
+            totalAmount: {
+              type: "integer",
+              description: "Total number of records",
+            },
+            totalRate: {
+              type: "integer",
+              description: "Total number of records",
+            },
+          },
+        },
+      },
+      
+    },
+    handler: ShipmentDtlReportHandler,
+  }),
 
   done();
 };

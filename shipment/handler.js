@@ -46,6 +46,8 @@ const createShipmentHandler = async (req, reply) => {
         product: new mongoose.Types.ObjectId(shipDtl.product),
         currency: new mongoose.Types.ObjectId(shipDtl.currency),
         shipment: new mongoose.Types.ObjectId(create._id),
+        customer: new mongoose.Types.ObjectId(shipDtl.customer),
+        salesContract: new mongoose.Types.ObjectId(salesContract),
       });
       const sales = await SalesContractModel.findByIdAndUpdate(salesContract, {
         shipment: true,
@@ -159,7 +161,7 @@ const ShipmentdtlsfindByDateHandler = async (req, reply) => {
     const fromDate = moment(req.body.fromDate).startOf("day");
     const toDate = moment(req.body.toDate).endOf("day");
     const salecontractid = req.body.salesContract_id;
-    console.log(salecontractid);
+
     if (!salecontractid) {
       const sales = await ShipmentdtlModel.find({
         gpDate: {
@@ -198,7 +200,7 @@ const ShipmentdtlsfindByDateHandler = async (req, reply) => {
         salesContract: salecontractid,
         isDeleted: false,
       });
-      console.log(saleContract._id);
+     
 
       const sales = await ShipmentdtlModel.find({
         shipment: saleContract._id,
@@ -303,11 +305,341 @@ const ShipmentupdatebyidHandler = async (req, reply) => {
         product: new mongoose.Types.ObjectId(shipDtl.product),
         currency: new mongoose.Types.ObjectId(shipDtl.currency),
         shipment: new mongoose.Types.ObjectId(create._id),
+        customer: new mongoose.Types.ObjectId(shipDtl.customer),
       });
     }
     return reply.status(200).send("Sucessfully updated!");
   } catch (err) {
     reply.status(500).send({ message: err.message });
+  }
+};
+
+const ShipmentDtlReportHandler = async (req, reply) => {
+  try {
+    
+    if (
+      Array.isArray(req.body.salesContract) &&
+      req.body.salesContract.length === 0 &&
+      Array.isArray(req.body.customer) &&
+      req.body.customer.length === 0 &&
+      Array.isArray(req.body.product) &&
+      req.body.product.length === 0
+    ) {
+      
+      let where = {};
+
+      const fromDate = moment(req.body.fromDate).startOf("day");
+      const toDate = moment(req.body.toDate).endOf("day");
+      const limit = req.body.perPage;
+      const skipCount = (req.body.pageno - 1) * limit;
+    
+      where = {
+        gpDate: {
+          $gte: fromDate.toDate(),
+          $lte: toDate.toDate(),
+        },
+        isDeleted: false,
+      };
+      const total_record = await ShipmentdtlModel.aggregate([
+        {
+          $match: where,
+        },
+      ]);
+      const Shipmentdtl = await ShipmentdtlModel.aggregate([
+        {
+          $match: where,
+        },
+
+        {
+          $lookup: {
+            from: "shipments",
+            localField: "shipment",
+            foreignField: "_id",
+            as: "shipment",
+          },
+        },
+        {
+          $lookup: {
+            from: "salescontracts",
+            localField: "salesContract",
+            foreignField: "_id",
+            as: "salecontractdtl",
+          },
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "product",
+            foreignField: "_id",
+            as: "product_dtl",
+          },
+        },
+        {
+          $lookup: {
+            from: "customers",
+            localField: "customer",
+            foreignField: "_id",
+            as: "customer",
+          },
+        },
+        { $skip: skipCount },
+        { $limit: limit },
+        { $sort: { shipment: 1 } },
+      ]);
+      let result = {
+        // message: "Successfully retrieved id!",
+        Shipmentdtl: Shipmentdtl,
+        total_records: total_record.length,
+        paginated_record: Shipmentdtl.length,
+      };
+
+      return result;
+    } 
+    else if (Array.isArray(req.body.salesContract) && req.body.salesContract.length > 0 || Array.isArray(req.body.customer) && req.body.customer.length > 0 || Array.isArray(req.body.product) && req.body.product.length > 0) {
+
+      let where = {};
+      let  filter = {};
+      let  filter_group = {};
+      const fromDate = moment(req.body.fromDate).startOf("day");
+      const toDate = moment(req.body.toDate).endOf("day");
+      const limit = req.body.perPage;
+      const skipCount = (req.body.pageno - 1) * limit;
+      const salecontractArr = req.body.salesContract ? req.body.salesContract.map((id) => new mongoose.Types.ObjectId(id)): [];
+
+
+      const customerArr = req.body.customer ? req.body.customer.map((id) => new mongoose.Types.ObjectId(id)) : [];
+      const productArr = req.body.product ? req.body.product.map((id) => new mongoose.Types.ObjectId(id)) : [];
+
+      if (salecontractArr.length > 0 && productArr.length > 0 && customerArr.length > 0) {
+
+
+
+        where.$and = [
+          {
+            salesContract: { $in: salecontractArr },
+            customer: { $in: customerArr },
+            product: { $in: productArr },
+          },
+        ];
+        filter = {
+          product: { $in: productArr },
+          customer: { $in: customerArr },
+          salesContract: { $in: salecontractArr },
+        };
+        filter_group.$and = [
+          {
+            customer: { $in: customerArr },
+            salesContract: { $in: salecontractArr },
+            product: { $in: productArr },
+          },
+        ];
+      }
+     else if (salecontractArr.length > 0 && customerArr.length > 0) {
+  
+      where.$and = [
+        {
+          salesContract: { $in: salecontractArr },
+          customer: { $in: customerArr },
+        },
+      ];
+      filter = {
+        customer: { $in: customerArr },
+        salesContract: { $in: salecontractArr },
+      };
+      filter_group.$and = [
+        {
+          customer: { $in: customerArr },
+          salesContract: { $in: salecontractArr },
+        },
+      ];
+    }
+     else if (salecontractArr.length > 0 && productArr.length > 0) {
+  
+      where.$and = [
+        {
+          salesContract: { $in: salecontractArr },
+          product: { $in: productArr },
+        },
+      ];
+      filter = {
+        product: { $in: productArr },
+        salesContract: { $in: salecontractArr },
+      };
+      filter_group.$and = [
+        {
+          product: { $in: productArr },
+          salesContract: { $in: salecontractArr },
+        },
+      ];
+    } else if (customerArr.length > 0 && productArr.length > 0) {
+ 
+      where.$and = [
+        {
+          customer: { $in: customerArr },
+          product: { $in: productArr },
+        },
+      ];
+      filter = {
+        product: { $in: productArr },
+        customer: { $in: customerArr },
+      };
+      filter_group.$and = [
+        {
+          customer: { $in: customerArr },
+
+          product: { $in: productArr },
+        },
+      ];
+    } else if (salecontractArr.length > 0) {
+     
+
+      where = {
+        salesContract: { $in: salecontractArr },
+      };
+
+      filter = {
+        salesContract: { $in: salecontractArr },
+      };
+      filter_group = {
+        salesContract: { $in: salecontractArr },
+      };
+    } else if (customerArr.length > 0) {
+    
+      where = {
+        customer: { $in: customerArr },
+      };
+
+      filter = {
+        customer: { $in: customerArr },
+      };
+      filter_group = {
+        customer: { $in: customerArr },
+      };
+    } else if (productArr.length > 0) {
+  
+      where = {
+        product: { $in: productArr },
+      };
+
+      filter = {
+        product: { $in: productArr },
+      };
+      filter_group = {
+        product: { $in: productArr },
+      };
+    }
+const total_records= await ShipmentdtlModel.aggregate([
+  {
+    $match:{
+      gpDate:{
+        $gte: new Date(req.body.fromDate),
+        $lte: new Date(req.body.toDate),
+      },
+      isDeleted:false
+    }
+  },{
+    $match:filter_group
+  }
+])
+
+  const group_by = await ShipmentdtlModel.aggregate([
+    {
+      $match:{
+        gpDate:{
+          $gte: fromDate.toDate(),
+          $lte: toDate.toDate(),
+        },
+        isDeleted:false
+      }
+    },
+    {
+    $match:filter
+    },
+      {
+        $group: {
+          _id: 'null',
+          rate: {
+            $sum: '$rate',
+          },
+          amount: {
+            $sum: '$amount',
+          },
+          qty: {
+            $sum: '$qty',
+          },
+        },
+      
+    }
+  ])
+  const totalQty = group_by.map((item) => item.qty);
+const totalRate = group_by.map((item) => item.rate);
+const totalAmount = group_by.map((item) => item.amount);
+
+
+const ShipmentDtl =  await ShipmentdtlModel.aggregate([
+  {
+    $match:{
+      gpDate:{
+        $gte: fromDate.toDate(),
+        $lte: toDate.toDate()
+      },
+      isDeleted:false
+    }
+  },
+  {
+    $match: where,
+  },
+
+  {
+    $lookup: {
+      from: "shipments",
+      localField: "shipment",
+      foreignField: "_id",
+      as: "shipment",
+    },
+  },
+  {
+    $lookup: {
+      from: "salescontracts",
+      localField: "salesContract",
+      foreignField: "_id",
+      as: "salecontractdtl",
+    },
+  },
+  {
+    $lookup: {
+      from: "products",
+      localField: "product",
+      foreignField: "_id",
+      as: "product_dtl",
+    },
+  },
+  {
+    $lookup: {
+      from: "customers",
+      localField: "customer",
+      foreignField: "_id",
+      as: "customer",
+    },
+  },
+  { $skip: skipCount },
+  { $limit: limit },
+  { $sort: { shipment: 1 } },
+]) 
+let result = {
+  Shipmentdtl: ShipmentDtl,
+  total_records: total_records.length,
+  paginated_record: ShipmentDtl.length,
+  totalQty:totalQty,
+  totalAmount:totalAmount,
+  totalRate:totalRate
+};
+
+return result
+
+    }
+  } catch (err) {
+    reply.status(500).send({ error: err.message });
   }
 };
 
@@ -319,4 +651,5 @@ module.exports = {
   ShipmentdeleteOneHandler,
   ShipmentDeleteallHandler,
   ShipmentupdatebyidHandler,
+  ShipmentDtlReportHandler,
 };
